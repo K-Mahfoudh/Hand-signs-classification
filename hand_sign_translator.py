@@ -40,7 +40,6 @@ def main(args):
         # Predicting
         network.predict(test_data)
 
-
     else:
         raise Exception('Wrong mode selected, try Train or Test')
 
@@ -61,8 +60,8 @@ if __name__ == '__main__':
                         '--model_load_path',
                         help='Loading previous checkpoint to continue training, must be set if checkpoint is True',
                         required=False, default='models/model.pth')
-    parser.add_argument('-tp', '--train_path', help='Path to traning data', default='data/data/train')
-    parser.add_argument('-ts', '--test_path', help='Path to testing data', default='data/data/test')
+    parser.add_argument('-tp', '--train_path', help='Path to training data', default='data/signs_data/train')
+    parser.add_argument('-ts', '--test_path', help='Path to testing data', default='data/signs_data/test')
     parser.add_argument('-b', '--batch_size', type=int, help='Path for saving the trained model', default=32)
     parser.add_argument('-lr', '--learning_rate', type=float, help='Selecting learning rate', default=0.0003)
     parser.add_argument('-e', '--epochs', help='Number of training epochs', type=int, default=250)
