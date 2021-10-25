@@ -48,8 +48,9 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=' Training a neural network for Hand sign recognition')
 
-    parser.add_argument('mode', help='Train for training network, Test for testing network', default='Train')
-    parser.add_argument('model_save_path', help='Path for saving the trained model')
+    parser.add_argument('-m', '--mode', help='Train for training network, Test for testing network', default='Train')
+    parser.add_argument('-ms', '--model_save_path', help='Path for saving the trained model',
+                        default='models/model.pth')
     parser.add_argument('-c',
                         '--checkpoint',
                         help='If set to True, training starts from previously trained model',
@@ -59,20 +60,21 @@ if __name__ == '__main__':
     parser.add_argument('-l',
                         '--model_load_path',
                         help='Loading previous checkpoint to continue training, must be set if checkpoint is True',
-                        required=False)
-    parser.add_argument('train_path', help='Path to traning data', default='data/data/train')
-    parser.add_argument('test_path', help='Path to testing data', default='data/data/test')
-    parser.add_argument('batch_size', type=int, help='Path for saving the trained model', default=32)
-    parser.add_argument('lr', type=float, help='Selecting learning rate', default=0.0003)
-    parser.add_argument('epochs', help='Number of training epochs', type=int, default=250)
-    parser.add_argument('valid_size', help='float representing size of validation set portion',
+                        required=False, default='models/model.pth')
+    parser.add_argument('-tp', '--train_path', help='Path to traning data', default='data/data/train')
+    parser.add_argument('-ts', '--test_path', help='Path to testing data', default='data/data/test')
+    parser.add_argument('-b', '--batch_size', type=int, help='Path for saving the trained model', default=32)
+    parser.add_argument('-lr', '--learning_rate', type=float, help='Selecting learning rate', default=0.0003)
+    parser.add_argument('-e', '--epochs', help='Number of training epochs', type=int, default=250)
+    parser.add_argument('-v', '--valid_size', help='float representing size of validation set portion',
                         type=float,
                         default=0.2)
-    parser.add_argument('slice',
+    parser.add_argument('-s', 'slice',
                         help='Defines size of data used in training, this is used of you have a bad GPU and huge data',
                         type=int,
                         default=1)
-    parser.add_argument('--shuffle', type=bool, help='Set to True for shuffling test data', required=False, default=True)
+    parser.add_argument('-sh', '--shuffle', type=bool, help='Set to True for shuffling test data', required=False,
+                        default=True)
     args = parser.parse_args()
 
     main(args)

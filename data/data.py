@@ -6,7 +6,18 @@ import torch
 
 
 class Data:
+    """
+    Class for managing and preparing data for training, validation and testing phases.
+
+    """
     def __init__(self, train_path, test_path, batch_size, valid_size):
+        """
+        Class constructor.
+
+        :param train_path: string representing train set path
+        :param test_path: string representing test set path
+        :param batch_size: batch size to be used in training
+        """
         self.train_path = train_path
         self.test_path = test_path
         self.batch_size = batch_size
@@ -15,6 +26,11 @@ class Data:
         self.valid_size = valid_size
 
     def get_trainset(self):
+        """
+        Loading train and validation set to dataLoaders.
+
+        :return: tuple of DataLoader instances
+        """
         # Defning proper transform
         self.train_transform = transforms.Compose([
             transforms.RandomRotation(30),
@@ -53,9 +69,13 @@ class Data:
 
         return train_loader, valid_loader
 
-
-
     def get_testset(self, shuffle):
+        """
+        Loading test images on a DataLoader instance.
+
+        :param shuffle: boolean value to shuffle the data
+        :return: DataLoader instance containing test images
+        """
         # Defining a transform method
         self.test_transform = transforms.Compose([
             transforms.Resize(224),
@@ -73,6 +93,12 @@ class Data:
 
 
 def get_class_name(path, level):
+    """
+    Function used to extract image name.
+
+    :param path: image path
+    :return: string representing image name
+    """
     return path.split('\\')[level]
 
 

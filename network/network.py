@@ -10,7 +10,21 @@ from itertools import islice
 
 
 class Network(nn.Module):
+    """
+    Implementation of the neural network.
+
+    """
     def __init__(self, model_path, epochs, lr, slice):
+        """
+        Neural network constructor
+
+        :param model_path: string representing path to the model (for saving or loading and existent model)
+        :param epochs:  integer representing the number of epochs to be used for training
+        :param lr: float value representing the learning rate to be used in training
+        :param slice: an integer representing the slice of the training set to be used in training, this param is used
+        only because i didn't have a good GPU, so i performed training on a part of the data, saved the model, then
+        performed the training on the whole data based on the previous model
+        """
         super(Network, self).__init__()
         self.criterion = nn.NLLLoss()
         self.optimizer = None
@@ -22,8 +36,12 @@ class Network(nn.Module):
         self.set_classifier(lr)
         self.slice = slice
 
-
     def set_classifier(self, lr):
+        """
+        A method used to change classification layer (fine-tuning).
+
+        :param lr: learning rate to be used in training
+        """
         # Disable parameters training for the model
         for parameters in self.model.parameters():
             parameters.requires_grad = False
@@ -33,7 +51,7 @@ class Network(nn.Module):
             nn.Linear(2048, 512),
             nn.ReLU(),
             nn.Dropout(p=0.45),
-            nn.Linear(512,128),
+            nn.Linear(512, 128),
             nn.ReLU(),
             nn.Dropout(p=0.45),
             nn.Linear(128, 28),
@@ -45,14 +63,36 @@ class Network(nn.Module):
 
 
     def forward(self, data):
+        """
+        Implementation of forward propagation.
+
+        :param data: DataLoader instance representing data to be used in training
+        :return: result of forwarding data in the neural network (logps)
+        """
         # Performing first convolution (images are in grayscale, so depth is 1, but needed depth is 3)
         #data = self.conv0(data)
         return self.model(data)
 
     def get_model_details(self):
+        """
+        Helper method used to print information about the neural network.
+
+        """
         print(self.model)
 
     def train_network(self, train_loader, valid_loader):
+        """
+        Method used to train the neural network and calculate the loss and accuracy of training and validation.
+
+        This method contains 2 parts, the first part is training, where we perform forward and back propagation and
+        we update the parameters of the model. Second part is validation, we store parameters that gives the
+        best (minimum) loss. Note that the program will train the model using GPU if it supports cuda, otherwise,
+        it will use CPU.
+
+        :param train_loader: dataloader object containing training images
+        :param valid_loader: dataloader object containing validation images
+        :return: 4 lists containing history of loss and accuracy of both training and validation steps
+        """
         train_loss_list = []
         train_accuracy_list = []
         valid_loss_list = []
@@ -172,6 +212,11 @@ class Network(nn.Module):
         return train_loss_list, train_accuracy_list, valid_loss_list, valid_accuracy_list
 
     def predict(self, dataset):
+        """
+        A method used to predict the labels of given images, and print accuracy and loss.
+
+        :param dataset: dataloader object containing test images.
+        """
         self.to(self.device)
         if not self.eval():
             self.eval()
@@ -210,24 +255,27 @@ class Network(nn.Module):
             loss = loss / len(dataset)
             print('The accuracy is {} ------- loss: {}'.format(accuracy, loss))
 
-
-
-
-
-
-    def set_min_valid_loss(self, loss):
-        self.min_valid_loss = loss
-
     def load_model(self, model_path):
+        """
+        Method used to load an existent model.
+
+        :param model_path: path to the model to be loaded
+        """
         print('Loading model from path: {}'.format(model_path))
         model_dict = torch.load(model_path)
         self.min_valid_loss = model_dict['min_loss']
         self.load_state_dict(model_dict['state_dict'])
         print('Min valid loss is: {}'.format(self.min_valid_loss))
 
+    """
     def NLLLoss(self, logits, labels):
             output = torch.zeros_like(labels)
             for i in range(len(labels)):
                 output[i] = logits[i][labels[i]]
 
             return -output.type(torch.FloatTensor).sum()/len(output)
+    
+
+    def set_min_valid_loss(self, loss):
+        self.min_valid_loss = loss
+    """
