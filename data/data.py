@@ -3,6 +3,8 @@ from dataloader import PathImageFolder
 import numpy as np
 from torch.utils.data import SubsetRandomSampler
 import torch
+from PIL import Image
+from matplotlib import cm
 
 
 class Data:
@@ -10,6 +12,7 @@ class Data:
     Class for managing and preparing data for training, validation and testing phases.
 
     """
+
     def __init__(self, train_path, test_path, batch_size, valid_size):
         """
         Class constructor.
@@ -55,7 +58,7 @@ class Data:
         np.random.shuffle(index_list)
 
         # Defining splitter
-        splitter = int(np.floor(self.valid_size*data_size))
+        splitter = int(np.floor(self.valid_size * data_size))
 
         # Splitting index_list
         valid_list, train_list = index_list[:splitter], index_list[splitter:]
@@ -92,6 +95,31 @@ class Data:
         return test_loader
 
 
+def preprocess_image(frame):
+    """
+        Transforming and loading single numpy image.
+
+        :param frame: numpy array representing the frame captured by opencv
+        :return: DataLoader instance containing the transformed image
+        """
+    # Transforming numpy array to PIL image
+    try:
+        frame = Image.fromarray(frame)
+
+        transform = transforms.Compose([
+            transforms.Resize(224),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                 std=[0.229, 0.224, 0.225])
+        ])
+        image_data = transform(frame)
+        image_loader = torch.utils.data.DataLoader(image_data, batch_size=32)
+        return image_loader
+
+    except Exception as e:
+        print(e)
+
+
 def get_class_name(path, level):
     """
     Function used to extract image name.
@@ -100,5 +128,3 @@ def get_class_name(path, level):
     :return: string representing image name
     """
     return path.split('\\')[level]
-
-

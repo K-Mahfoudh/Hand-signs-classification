@@ -31,7 +31,8 @@ class Network(nn.Module):
         self.model_path = model_path
         self.model = models.resnet152(pretrained=True, progress=True)
         self.epochs = epochs
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        #self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.device = torch.device('cpu')
         self.min_valid_loss = np.inf
         self.set_classifier(lr)
         self.slice = slice
@@ -61,7 +62,6 @@ class Network(nn.Module):
         # Changing optimizer
         self.optimizer = optim.Adam(self.model.fc.parameters(), lr=lr)
 
-
     def forward(self, data):
         """
         Implementation of forward propagation.
@@ -69,8 +69,6 @@ class Network(nn.Module):
         :param data: DataLoader instance representing data to be used in training
         :return: result of forwarding data in the neural network (logps)
         """
-        # Performing first convolution (images are in grayscale, so depth is 1, but needed depth is 3)
-        #data = self.conv0(data)
         return self.model(data)
 
     def get_model_details(self):
@@ -227,7 +225,7 @@ class Network(nn.Module):
                 # Sending data to GPU if cuda is available
                 if len(images) > 1:
                     images, labels = images.to(self.device), labels.to(self.device)
-
+                print(images.shape)
                 # Performing forward pass
                 logits = self.forward(images)
 
@@ -249,11 +247,28 @@ class Network(nn.Module):
                 accuracy += acc
 
                 # Visualization
-                visualize_image(images, labels, paths, top_class, top_p)
+                #visualize_image(images, labels, paths, top_class, top_p)
 
             accuracy = accuracy / len(dataset) * 100
             loss = loss / len(dataset)
             print('The accuracy is {} ------- loss: {}'.format(accuracy, loss))
+
+    def predict_single(self, image_loader):
+        with torch.no_grad():
+            print('Image loader shape is: ')
+            for index, image in enumerate(image_loader):
+                # Sending data to GPU if cuda is available
+                images = image.to(self.device).unsqueeze(0)
+                print(image.shape)
+                # Performing forward pass
+                logits = self.forward(images)
+
+                # Getting predictions
+                preds = F.softmax(logits, dim=1)
+
+                # Getting top class and top probabilities
+                top_p, top_class = preds.topk(1, dim=1)
+                return top_p, top_class
 
     def load_model(self, model_path):
         """
